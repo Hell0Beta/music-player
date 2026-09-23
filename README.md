@@ -40,7 +40,7 @@ npx @hell0beta/music-player-cli --name "Akari" --artist "Soushi Sakiyama" \
 
 |                          Default vinyl                           |                        Cover art on the disc                         |
 | :--------------------------------------------------------------: | :------------------------------------------------------------------: |
-| <img src=".github/assets/vinyl.png" alt="Default vinyl player" width="100%"> | <img src=".github\assets\Screenshot 2026-09-23 132628.png" alt="Player with album cover" width="100%"> |
+| <img src=".github/assets/vinyl.png" alt="Default vinyl player" width="100%"> | <img src=".github\assets\vinyll.png" alt="Player with album cover" width="100%"> |
 
 ---
 
