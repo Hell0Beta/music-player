@@ -10,7 +10,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-PLAYER_DIR = Path(r"C:\Users\User\Desktop\programmin\music-player")
+PLAYER_DIR = Path(__file__).resolve().parent
 TEMPLATE_PATH = PLAYER_DIR / "template.html"
 
 # Palettes to cycle through. Each sets the brass/room accent tokens in

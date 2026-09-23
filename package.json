@@ -2,8 +2,20 @@
   "name": "music-player-cli",
   "version": "1.0.0",
   "description": "Generate self-contained vinyl record player HTML files from audio + images",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Hell0Beta/music-player.git"
+  },
+  "homepage": "https://github.com/Hell0Beta/music-player#readme",
+  "bugs": {
+    "url": "https://github.com/Hell0Beta/music-player/issues"
+  },
+  "author": "hell0beta",
   "bin": {
     "music-player": "cli.js"
+  },
+  "engines": {
+    "node": ">=14"
   },
   "files": [
     "cli.js",

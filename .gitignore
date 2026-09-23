@@ -1,0 +1,15 @@
+# Generated players embed media as base64 — keep them out of git
+/*.html
+!template.html
+
+# Local-only artifacts
+*.b64
+*.txt.b64
+song.txt
+
+# Dependencies
+node_modules/
+
+# OS noise
+.DS_Store
+Thumbs.db
