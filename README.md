@@ -33,7 +33,7 @@ npx @hell0beta/music-player-cli --name "Akari" --artist "Soushi Sakiyama" \
 ## 📸 Screenshots
 
 <div align="center">
-  <img src=".github/assets/Lplp.gif" alt="Animated record player with backdrop image" width="100%" />
+  <img src=".github/assets/hero.png" alt="Animated record player with backdrop image" width="100%" />
 </div>
 
 <br />
