@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://www.npmjs.com/package/music-player-cli" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/npm/v/music-player-cli?style=for-the-badge&logo=npm&label=npm" alt="npm version" /></a>
+  <a href="https://www.npmjs.com/package/@hell0beta/music-player-cli" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/npm/v/%40hell0beta%2Fmusic-player-cli?style=for-the-badge&logo=npm&label=npm" alt="npm version" /></a>
   <a href="https://github.com/Hell0Beta/music-player" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/badge/Source-GitHub-blue?style=for-the-badge&logo=github" alt="View source on GitHub" /></a>
   <a href="LICENSE" target="_blank" rel="noopener noreferrer"><img src="https://img.shields.io/github/license/Hell0Beta/music-player?style=for-the-badge" alt="License badge" /></a>
   <img src="https://img.shields.io/badge/dependencies-zero-brightgreen?style=for-the-badge" alt="Zero dependencies" />
@@ -24,7 +24,7 @@
 The output needs **no server, no build tools, and no runtime dependencies** beyond two Google Fonts. Email it, host it as one static file, or drop it into any CMS — it just opens in a browser.
 
 ```sh
-npx music-player-cli --name "Akari" --artist "Soushi Sakiyama" \
+npx @hell0beta/music-player-cli --name "Akari" --artist "Soushi Sakiyama" \
   --audio song.m4a --img background.png --open
 ```
 
@@ -64,14 +64,14 @@ npx music-player-cli --name "Akari" --artist "Soushi Sakiyama" \
 ### One-off (no install)
 
 ```sh
-npx music-player-cli --name "Akari" --artist "Soushi Sakiyama" \
+npx @hell0beta/music-player-cli --name "Akari" --artist "Soushi Sakiyama" \
   --audio "song.m4a" --img "background.png" --shade 0.72 --open
 ```
 
 ### Global install
 
 ```sh
-npm install -g music-player-cli
+npm install -g @hell0beta/music-player-cli
 
 music-player --name "Demo" --audio demo.mp3 --cover art.jpg --shade 0.5 --open
 ```

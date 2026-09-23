@@ -1,7 +1,10 @@
 {
-  "name": "music-player-cli",
+  "name": "@hell0beta/music-player-cli",
   "version": "1.0.0",
   "description": "Generate self-contained vinyl record player HTML files from audio + images",
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Hell0Beta/music-player.git"
