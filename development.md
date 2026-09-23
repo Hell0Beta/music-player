@@ -16,9 +16,9 @@ have one, cover art.
 | File | Purpose |
 |---|---|
 | `template.html` | The engine: markup, styles, and playback/scrubbing logic, with a `__TRACKLIST__` marker where track data goes. The single source of truth for the design. |
-| `cli.js` | The `music-player` Node command (optional alternative to the Python generator). Base64-encodes your media, fills the marker in `template.html`, writes a finished HTML file. |
-| `package.json` | Exposes `cli.js` as the `music-player` bin (install with `npm link`). |
-| `cli-usage.txt` | Help text shown by `music-player --help`. |
+| `cli.js` | The `music-player-cli` Node command (optional alternative to the Python generator). Base64-encodes your media, fills the marker in `template.html`, writes a finished HTML file. |
+| `package.json` | Exposes `cli.js` as the `music-player-cli` bin, with `music-player` as an alias (install with `npm link`). |
+| `cli-usage.txt` | Help text shown by `music-player-cli --help`. |
 | `index.html` | A generated player (built by the CLI from the template) — currently contains the demo track, viewable immediately. |
 | `music-player.py` | The Python generator (mirrors storytime.py: argparse, palettes, slug-named output in the project folder). |
 | `design.md` | Design rationale — palette, type, layout, gradient veils, and why. |
@@ -137,7 +137,7 @@ convention as storytime.py. Only dependency: Python 3 itself.
 
 ```bash
 npm link   # one-time, inside the music-player folder
-music-player --name "Song" --artist "Artist" --audio song.mp3 \
+music-player-cli --name "Song" --artist "Artist" --audio song.mp3 \
              --img background.png --cover cover.jpg --shade 0.6 --out player.html
 ```
 

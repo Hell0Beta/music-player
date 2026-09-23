@@ -103,7 +103,7 @@ beneath — the same "present enough to discover, quiet enough to forget"
 stance as storytime's page controls.
 
 ### The CLI as part of the design
-`music-player.py` (mirroring storytime.py) and the optional `music-player`
+`music-player.py` (mirroring storytime.py) and the optional `music-player-cli`
 Node command exist so the artifact stays hand-made even when generated:
 they only *fill in* the `TRACKLIST` data and optionally retheme the
 `:root` palette tokens inside `template.html` — they never touch the

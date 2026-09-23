@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""music-player - Generate a self-contained HTML vinyl record player from an audio file and images."""
+"""music-player-cli - Generate a self-contained HTML vinyl record player from an audio file and images."""
 
 import argparse
 import base64
@@ -149,7 +149,7 @@ def open_in_browser(path: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="music-player - Generate a self-contained HTML vinyl record player from an audio file and images."
+        description="music-player-cli - Generate a self-contained HTML vinyl record player from an audio file and images."
     )
     parser.add_argument("-a", "--audio", required=True,
                         help="Audio file (m4a/mp3/wav/ogg/aac) - embedded as base64")

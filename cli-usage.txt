@@ -1,9 +1,11 @@
-music-player — build a self-contained record-player HTML file
+music-player-cli — build a self-contained record-player HTML file
 
 USAGE
-  music-player --name "Song" --artist "Artist" --audio song.mp3
-               [--img background.png] [--cover cover.jpg]
-               [--shade 0.6] [--out player.html] [--open]
+  music-player-cli --name "Song" --artist "Artist" --audio song.mp3
+                   [--img background.png] [--cover cover.jpg]
+                   [--shade 0.6] [--out player.html] [--open]
+
+  (music-player is installed as an alias and works the same way.)
 
 REQUIRED
   --name    Track title
@@ -24,10 +26,10 @@ OPTIONAL
   --version Show version
 
 EXAMPLES
-  music-player --name "All I Want for Christmas Is You" \
+  music-player-cli --name "All I Want for Christmas Is You" \
     --artist "Mariah Carey" --audio "song.m4a" --img "background.png"
 
-  music-player --name "Demo" --audio demo.mp3 --cover art.jpg --shade 0.5 --open
+  music-player-cli --name "Demo" --audio demo.mp3 --cover art.jpg --shade 0.5 --open
 
 NOTES
   Base64 embedding inflates files by ~33%; keep source media small

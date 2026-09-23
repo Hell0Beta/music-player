@@ -5,9 +5,9 @@
   Builds a self-contained record-player HTML file from media files.
 
   Usage:
-    music-player --name "Song" --artist "Artist" --audio song.mp3 \
-                 [--img background.png] [--cover cover.jpg] \
-                 [--shade 0.6] [--out player.html]
+    music-player-cli --name "Song" --artist "Artist" --audio song.mp3 \
+                     [--img background.png] [--cover cover.jpg] \
+                     [--shade 0.6] [--out player.html]
 
   All options:
     --name    Track title (required)
@@ -112,7 +112,7 @@ function main() {
 
   if (flags.version || flags.v) {
     const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
-    console.log('music-player ' + pkg.version);
+    console.log('music-player-cli ' + pkg.version);
     return;
   }
 

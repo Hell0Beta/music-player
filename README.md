@@ -19,7 +19,7 @@
 
 ## 🎧 About
 
-`music-player` is a tiny CLI that bakes an audio file — plus optional background and cover art — into a single HTML file: a physical-feeling **vinyl record player** with a tonearm that swings on when you press play, a disc that spins only while sound plays, and a frosted translucent plinth floating over a dimmed backdrop.
+`music-player-cli` is a tiny CLI that bakes an audio file — plus optional background and cover art — into a single HTML file: a physical-feeling **vinyl record player** with a tonearm that swings on when you press play, a disc that spins only while sound plays, and a frosted translucent plinth floating over a dimmed backdrop.
 
 The output needs **no server, no build tools, and no runtime dependencies** beyond two Google Fonts. Email it, host it as one static file, or drop it into any CMS — it just opens in a browser.
 
@@ -73,7 +73,7 @@ npx @hell0beta/music-player-cli --name "Akari" --artist "Soushi Sakiyama" \
 ```sh
 npm install -g @hell0beta/music-player-cli
 
-music-player --name "Demo" --audio demo.mp3 --cover art.jpg --shade 0.5 --open
+music-player-cli --name "Demo" --audio demo.mp3 --cover art.jpg --shade 0.5 --open
 ```
 
 ### From source
@@ -81,8 +81,8 @@ music-player --name "Demo" --audio demo.mp3 --cover art.jpg --shade 0.5 --open
 ```sh
 git clone https://github.com/Hell0Beta/music-player.git
 cd music-player
-npm link        # exposes the `music-player` command
-music-player --help
+npm link        # exposes `music-player-cli` (alias: `music-player`)
+music-player-cli --help
 ```
 
 The generated file lands next to the project as `<song-name-slug>.html` (or wherever `--out` points). Open it in any browser — double-click works.
@@ -141,9 +141,9 @@ Only dependency: Python 3.
 | File                | Purpose                                                                                                             |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `template.html`     | The engine — markup, styles, playback logic, and the `__TRACKLIST__` marker. Single source of truth for the design.  |
-| `cli.js`            | The `music-player` Node command. Base64-encodes media, fills the marker, writes a finished HTML file.                 |
-| `cli-usage.txt`     | Help text for `music-player --help`.                                                                                |
-| `package.json`      | Exposes `cli.js` as the `music-player` bin.                                                                         |
+| `cli.js`            | The `music-player-cli` Node command. Base64-encodes media, fills the marker, writes a finished HTML file.            |
+| `cli-usage.txt`     | Help text for `music-player-cli --help`.                                                                            |
+| `package.json`      | Exposes `cli.js` as the `music-player-cli` bin (`music-player` alias).                                              |
 | `music-player.py`   | Python generator with palette support.                                                                              |
 | `index.html`        | The demo player — viewable immediately.                                                                             |
 | `design.md`         | Design rationale: palette, type, layout, gradient veils, and why.                                                   |
