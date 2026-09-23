@@ -33,14 +33,14 @@ npx @hell0beta/music-player-cli --name "Akari" --artist "Soushi Sakiyama" \
 ## 📸 Screenshots
 
 <div align="center">
-  <img src=".github/assets/hero.jpg" alt="Record player with backdrop image" width="100%" />
+  <img src=".github/assets/Lplp.gif" alt="Animated record player with backdrop image" width="100%" />
 </div>
 
 <br />
 
 |                          Default vinyl                           |                        Cover art on the disc                         |
 | :--------------------------------------------------------------: | :------------------------------------------------------------------: |
-| <img src=".github/assets/vinyl.jpg" alt="Default vinyl player" width="100%"> | <img src=".github/assets/cover.jpg" alt="Player with album cover" width="100%"> |
+| <img src=".github/assets/vinyl.png" alt="Default vinyl player" width="100%"> | <img src=".github\assets\Screenshot 2026-09-23 132628.png" alt="Player with album cover" width="100%"> |
 
 ---
 
