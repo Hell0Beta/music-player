@@ -1,0 +1,22 @@
+{
+  "name": "music-player-cli",
+  "version": "1.0.0",
+  "description": "Generate self-contained vinyl record player HTML files from audio + images",
+  "bin": {
+    "music-player": "cli.js"
+  },
+  "files": [
+    "cli.js",
+    "template.html",
+    "cli-usage.txt"
+  ],
+  "keywords": [
+    "music",
+    "player",
+    "vinyl",
+    "html",
+    "single-file",
+    "audio"
+  ],
+  "license": "MIT"
+}

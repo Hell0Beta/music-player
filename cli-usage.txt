@@ -1,0 +1,34 @@
+music-player — build a self-contained record-player HTML file
+
+USAGE
+  music-player --name "Song" --artist "Artist" --audio song.mp3
+               [--img background.png] [--cover cover.jpg]
+               [--shade 0.6] [--out player.html] [--open]
+
+REQUIRED
+  --name    Track title
+  --audio   Audio file (.m4a .mp3 .wav .ogg .aac) — embedded as base64
+
+OPTIONAL
+  --artist  Artist name                     (default: "Unknown Artist")
+  --img     Full-page background image (.png .jpg .webp .gif).
+            A dimming gradient veil is laid over it so it stays
+            atmospheric and doesn't compete with the player.
+  --cover   Album art on the spinning disc (.jpg .png .webp).
+            A vignette shade is layered over it for depth.
+  --shade   Backdrop dimming strength, 0..1 (default 0.72).
+            Higher = darker. 0 shows the image nearly undimmed.
+  --out     Output file (default: <music-player folder>/<song-name-slug>.html)
+  --open    Open the generated file in your default browser
+  --help    Show this help
+  --version Show version
+
+EXAMPLES
+  music-player --name "All I Want for Christmas Is You" \
+    --artist "Mariah Carey" --audio "song.m4a" --img "background.png"
+
+  music-player --name "Demo" --audio demo.mp3 --cover art.jpg --shade 0.5 --open
+
+NOTES
+  Base64 embedding inflates files by ~33%; keep source media small
+  (audio under ~15 MB, images under ~3 MB) for fast-loading pages.

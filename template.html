@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Record Player</title>
+
+<!--
+  ============================================================
+  RECORD PLAYER — template.html
+  ============================================================
+  This is the engine. The `music-player` CLI (see cli.js) fills
+  the TRACKLIST marker below and writes a finished HTML file.
+
+  Manual use — open this file and edit the TRACKLIST data:
+    { title, artist, audioSrc, coverImage, backdropImage, shade }
+
+  AUDIO  (required) — base64 data URI:
+    audioSrc: "data:audio/mpeg;base64,<BASE64_STRING>"
+  COVER  (optional) — round album art on the spinning disc:
+    coverImage: "data:image/jpeg;base64,..."
+  BACKDROP (optional) — full-page background image behind the
+  player, dimmed by a gradient veil so it never competes with
+  the controls:
+    backdropImage: "data:image/jpeg;base64,..."
+  SHADE  (optional) — 0..1 backdrop dimming strength for this
+  track (default 0.72; higher = darker):
+    shade: 0.6
+
+  Or generate a file from the terminal:
+    music-player --name "Song" --artist "Artist" \
+                 --audio song.mp3 --img background.png \
+                 --cover cover.jpg --shade 0.6 --out player.html
+  ============================================================
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-1:#1b140f;
+    --bg-2:#241b14;
+    --vinyl:#100d0a;
+    --groove:#2a2119;
+    --brass:#c79a4b;
+    --brass-light:#e6c789;
+    --cream:#f2e9d8;
+    --muted:#a9998c;
+    --shadow: rgba(0,0,0,0.55);
+    --veil: 0.72;          /* backdrop dimming strength (0 = clear, 1 = invisible) */
+    --cover-shade: 0.55;   /* vignette strength over cover art on the disc */
+    --font-display: "Fraunces", Georgia, serif;
+    --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  *{ box-sizing: border-box; }
+
+  html,body{
+    height:100%;
+    margin:0;
+  }
+
+  body{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:100vh;
+    padding:32px 16px;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(199,154,75,0.08), transparent 55%),
+      linear-gradient(160deg, var(--bg-1), #120d09 70%);
+    font-family:var(--font-body);
+    color:var(--cream);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ---------- full-page backdrop + gradient veil ---------- */
+
+  .backdrop{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    display:none;
+    overflow:hidden;
+  }
+
+  .backdrop img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+  }
+
+  /* the veil: a brass-tinged tint that keeps the photo atmospheric
+     instead of distracting — strength set by --veil */
+  .backdrop-veil{
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(circle at 30% 20%, rgba(199,154,75,0.10), transparent 55%),
+      linear-gradient(rgba(27,20,15,var(--veil)), rgba(18,13,9,calc(var(--veil) + 0.08)));
+  }
+
+  .player{
+    position:relative;
+    z-index:1;
+    width:100%;
+    max-width:380px;
+    background: linear-gradient(180deg, rgba(36,27,20,0.55), rgba(29,22,16,0.45));
+    backdrop-filter: blur(18px) saturate(1.2);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    border-radius:24px;
+    padding:36px 30px 30px;
+    box-shadow: 0 30px 60px var(--shadow), inset 0 1px 0 rgba(255,255,255,0.06);
+    border:1px solid rgba(199,154,75,0.22);
+    user-select:none;
+  }
+
+  .meta{
+    text-align:center;
+    margin-bottom:28px;
+  }
+
+  #trackTitle{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:1.55rem;
+    line-height:1.25;
+    margin:0 0 6px;
+    letter-spacing:0.2px;
+  }
+
+  #trackArtist{
+    margin:0;
+    font-size:0.92rem;
+    color:var(--muted);
+    font-weight:500;
+  }
+
+  .stage{
+    position:relative;
+    width:250px;
+    height:250px;
+    margin:0 auto 30px;
+  }
+
+  .tonearm{
+    position:absolute;
+    top:-14px;
+    right:-28px;
+    width:130px;
+    height:130px;
+    z-index:3;
+    transform-origin: 108px 22px;
+    transform: rotate(-22deg);
+    transition: transform 0.7s cubic-bezier(.4,0,.2,1);
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.45));
+  }
+
+  .player.is-playing .tonearm{
+    transform: rotate(2deg);
+  }
+
+  .disc-wrap{
+    position:relative;
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    overflow:hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 0 6px #0e0b08, 0 0 0 7px rgba(199,154,75,0.25);
+  }
+
+  .vinyl{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    background:
+      repeating-radial-gradient(circle at center,
+        var(--groove) 0px, var(--groove) 1px,
+        var(--vinyl) 2px, var(--vinyl) 4px);
+    animation: spin 3.2s linear infinite;
+    animation-play-state: paused;
+  }
+
+  .vinyl::after{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.14), transparent 45%);
+  }
+
+  .label{
+    position:absolute;
+    inset:0;
+    margin:auto;
+    width:38%;
+    height:38%;
+    border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, var(--brass-light), var(--brass) 60%, #8f6a30 100%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: inset 0 0 0 2px rgba(0,0,0,0.25);
+  }
+
+  .label::after{
+    content:"";
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:#1b140f;
+  }
+
+  .cover{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:50%;
+    animation: spin 3.2s linear infinite;
+    animation-play-state: paused;
+    display:none;
+  }
+
+  /* gradient shade over cover art: soft sheen up top, dark vignette
+     at the rim so a busy photo keeps the disc's depth */
+  .cover-shade{
+    position:absolute;
+    inset:0;
+    border-radius:50%;
+    pointer-events:none;
+    display:none;
+    opacity:var(--cover-shade);
+    animation: spin 3.2s linear infinite;
+    animation-play-state: paused;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.10), transparent 42%),
+      radial-gradient(circle at center,
+        transparent 34%,
+        rgba(16,13,10,0.38) 66%,
+        rgba(16,13,10,0.88) 100%);
+  }
+
+  .player.is-playing .vinyl,
+  .player.is-playing .cover,
+  .player.is-playing .cover-shade{
+    animation-play-state: running;
+  }
+
+  @keyframes spin{
+    to{ transform: rotate(360deg); }
+  }
+
+  .transport{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+
+  .skip-btn{
+    flex:0 0 auto;
+    width:38px;
+    height:38px;
+    border-radius:50%;
+    border:1px solid rgba(199,154,75,0.35);
+    background:none;
+    color:var(--brass-light);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition: border-color 0.2s, color 0.2s;
+  }
+
+  .skip-btn:hover{
+    border-color:var(--brass-light);
+  }
+
+  .skip-btn svg{ width:15px; height:15px; }
+  .skip-btn[hidden]{ display:none; }
+
+  #playToggle{
+    flex:0 0 auto;
+    width:52px;
+    height:52px;
+    border-radius:50%;
+    border:none;
+    cursor:pointer;
+    background: linear-gradient(160deg, var(--brass-light), var(--brass));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow: 0 6px 16px rgba(199,154,75,0.35);
+    transition: transform 0.15s ease;
+  }
+
+  #playToggle:active{ transform: scale(0.94); }
+
+  #playToggle svg{ width:20px; height:20px; }
+
+  .timeline{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    min-width:0;
+  }
+
+  .scrubber{
+    position:relative;
+    height:4px;
+    border-radius:2px;
+    background: rgba(255,255,255,0.12);
+    cursor:pointer;
+    touch-action:none;
+  }
+
+  .scrubber-fill{
+    position:absolute;
+    inset:0;
+    width:0%;
+    border-radius:2px;
+    background: linear-gradient(90deg, var(--brass), var(--brass-light));
+  }
+
+  .scrubber-handle{
+    position:absolute;
+    top:50%;
+    left:0%;
+    width:11px;
+    height:11px;
+    border-radius:50%;
+    background:var(--brass-light);
+    transform: translate(-50%,-50%);
+    box-shadow: 0 0 0 3px rgba(199,154,75,0.2);
+  }
+
+  .times{
+    display:flex;
+    justify-content:space-between;
+    font-size:0.72rem;
+    color:var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  #trackCounter{
+    text-align:center;
+    margin-top:18px;
+    font-size:0.72rem;
+    letter-spacing:0.08em;
+    color:var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  #trackCounter[hidden]{ display:none; }
+
+  .hint{
+    text-align:center;
+    margin-top:18px;
+    font-size:0.72rem;
+    color:var(--muted);
+    opacity:0.7;
+  }
+
+  .hint[hidden]{ display:none; }
+
+  @media (prefers-reduced-motion: reduce){
+    .vinyl, .cover, .cover-shade{ animation: none !important; }
+    .tonearm{ transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="backdrop" id="backdrop" aria-hidden="true">
+  <img id="backdropImg" alt="">
+  <div class="backdrop-veil"></div>
+</div>
+
+<div class="player" id="player-root">
+
+  <div class="meta">
+    <h1 id="trackTitle">&mdash;</h1>
+    <p id="trackArtist">&mdash;</p>
+  </div>
+
+  <div class="stage">
+    <svg class="tonearm" viewBox="0 0 130 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="108" cy="22" r="10" fill="#2b241d" stroke="#c79a4b" stroke-width="2"/>
+      <line x1="108" y1="22" x2="18" y2="108" stroke="#d8c9a3" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="18" cy="108" r="5" fill="#c79a4b"/>
+    </svg>
+
+    <div class="disc-wrap">
+      <div class="vinyl" id="vinyl">
+        <div class="label"></div>
+      </div>
+      <img class="cover" id="coverArt" alt="Album cover">
+      <div class="cover-shade" id="coverShade"></div>
+    </div>
+  </div>
+
+  <div class="transport">
+    <button class="skip-btn" id="prevBtn" aria-label="Previous track" hidden>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6L18 6v12z"/></svg>
+    </button>
+
+    <button id="playToggle" aria-label="Play">
+      <svg id="iconPlay" viewBox="0 0 24 24" fill="#1b140f"><path d="M8 5v14l11-7z"/></svg>
+      <svg id="iconPause" viewBox="0 0 24 24" fill="#1b140f" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+    </button>
+
+    <button class="skip-btn" id="nextBtn" aria-label="Next track" hidden>
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 6h2v12h-2zM6 6l8.5 6L6 18z"/></svg>
+    </button>
+
+    <div class="timeline">
+      <div class="scrubber" id="scrubber" role="slider" aria-label="Seek">
+        <div class="scrubber-fill" id="scrubberFill"></div>
+        <div class="scrubber-handle" id="scrubberHandle"></div>
+      </div>
+      <div class="times">
+        <span id="currentTime">0:00</span>
+        <span id="duration">0:00</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="trackCounter" hidden></div>
+  <div class="hint" id="hint" hidden>
+    No audio embedded yet &mdash; see HOW TO USE at the top of this file.
+  </div>
+
+</div>
+
+<script>
+(function(){
+
+  /* ============================================================
+     RECORD DATA — the CLI fills the marker below.
+     See the HOW TO USE comment at the top of this file.
+     ============================================================ */
+  /* __TRACKLIST__ */
+
+  /* ============================================================
+     Player engine — no need to edit below this line.
+     ============================================================ */
+
+  const DEFAULT_SHADE = 0.72;
+
+  const root           = document.getElementById('player-root');
+  const audio          = new Audio();
+  audio.preload        = 'metadata';
+
+  const playBtn        = document.getElementById('playToggle');
+  const iconPlay       = document.getElementById('iconPlay');
+  const iconPause      = document.getElementById('iconPause');
+  const prevBtn        = document.getElementById('prevBtn');
+  const nextBtn        = document.getElementById('nextBtn');
+  const scrubber       = document.getElementById('scrubber');
+  const scrubberFill   = document.getElementById('scrubberFill');
+  const scrubberHandle = document.getElementById('scrubberHandle');
+  const currentTimeEl  = document.getElementById('currentTime');
+  const durationEl     = document.getElementById('duration');
+  const titleEl        = document.getElementById('trackTitle');
+  const artistEl       = document.getElementById('trackArtist');
+  const coverArt       = document.getElementById('coverArt');
+  const coverShade     = document.getElementById('coverShade');
+  const vinyl          = document.getElementById('vinyl');
+  const backdrop       = document.getElementById('backdrop');
+  const backdropImg    = document.getElementById('backdropImg');
+  const counterEl      = document.getElementById('trackCounter');
+  const hintEl         = document.getElementById('hint');
+
+  let current = 0;
+  let hasAudio = false;
+
+  function formatTime(sec){
+    if (!isFinite(sec)) return '0:00';
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
+  function setPlayingState(isPlaying){
+    root.classList.toggle('is-playing', isPlaying);
+    iconPlay.style.display  = isPlaying ? 'none'  : 'block';
+    iconPause.style.display = isPlaying ? 'block' : 'none';
+    playBtn.setAttribute('aria-label', isPlaying ? 'Pause' : 'Play');
+  }
+
+  function applyShade(v){
+    const n = (typeof v === 'number' && isFinite(v))
+      ? Math.min(1, Math.max(0, v))
+      : DEFAULT_SHADE;
+    document.documentElement.style.setProperty('--veil', n);
+  }
+
+  function loadTrack(index, autoplay){
+    current = (index + TRACKLIST.length) % TRACKLIST.length;
+    const track = TRACKLIST[current];
+
+    titleEl.textContent  = track.title || 'Untitled';
+    artistEl.textContent = track.artist || 'Unknown Artist';
+    document.title = (track.title ? track.title + ' — ' : '') + 'record player';
+
+    if (track.coverImage){
+      coverArt.src = track.coverImage;
+      coverArt.style.display = 'block';
+      coverShade.style.display = 'block';
+      vinyl.style.display = 'none';
+    } else {
+      coverArt.removeAttribute('src');
+      coverArt.style.display = 'none';
+      coverShade.style.display = 'none';
+      vinyl.style.display = 'block';
+    }
+
+    if (track.backdropImage){
+      backdropImg.src = track.backdropImage;
+      backdrop.style.display = 'block';
+    } else {
+      backdropImg.removeAttribute('src');
+      backdrop.style.display = 'none';
+    }
+    applyShade(track.shade);
+
+    scrubberFill.style.width   = '0%';
+    scrubberHandle.style.left  = '0%';
+    currentTimeEl.textContent  = '0:00';
+    durationEl.textContent     = '0:00';
+
+    hasAudio = !!track.audioSrc;
+    hintEl.hidden = hasAudio;
+    playBtn.style.opacity = hasAudio ? '1' : '0.4';
+    if (hasAudio) audio.src = track.audioSrc;
+    else audio.removeAttribute('src');
+
+    const multi = TRACKLIST.length > 1;
+    prevBtn.hidden = !multi;
+    nextBtn.hidden = !multi;
+    counterEl.hidden = !multi;
+    if (multi) counterEl.textContent = `${current + 1} / ${TRACKLIST.length}`;
+
+    if (autoplay && hasAudio) audio.play().catch(() => setPlayingState(false));
+  }
+
+  function next(){ loadTrack(current + 1, root.classList.contains('is-playing')); }
+  function prev(){ loadTrack(current - 1, root.classList.contains('is-playing')); }
+
+  playBtn.addEventListener('click', () => {
+    if (!hasAudio) return;
+    if (audio.paused) audio.play(); else audio.pause();
+  });
+
+  nextBtn.addEventListener('click', next);
+  prevBtn.addEventListener('click', prev);
+
+  audio.addEventListener('play',  () => setPlayingState(true));
+  audio.addEventListener('pause', () => setPlayingState(false));
+  audio.addEventListener('ended', () => {
+    if (TRACKLIST.length > 1) next();
+    else setPlayingState(false);
+  });
+
+  audio.addEventListener('loadedmetadata', () => {
+    durationEl.textContent = formatTime(audio.duration);
+  });
+
+  audio.addEventListener('timeupdate', () => {
+    const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+    scrubberFill.style.width  = pct + '%';
+    scrubberHandle.style.left = pct + '%';
+    currentTimeEl.textContent = formatTime(audio.currentTime);
+  });
+
+  /* ---------- scrubbing ---------- */
+
+  function seekFromPointer(e){
+    const rect = scrubber.getBoundingClientRect();
+    const pct = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+    if (audio.duration) audio.currentTime = pct * audio.duration;
+  }
+
+  let dragging = false;
+  scrubber.addEventListener('pointerdown', (e) => {
+    dragging = true;
+    scrubber.setPointerCapture(e.pointerId);
+    seekFromPointer(e);
+  });
+  scrubber.addEventListener('pointermove', (e) => { if (dragging) seekFromPointer(e); });
+  scrubber.addEventListener('pointerup',     () => dragging = false);
+  scrubber.addEventListener('pointercancel', () => dragging = false);
+
+  /* ---------- keyboard ---------- */
+
+  window.addEventListener('keydown', (e) => {
+    if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+    if (e.code === 'Space'){
+      e.preventDefault();
+      if (hasAudio){ audio.paused ? audio.play() : audio.pause(); }
+    } else if (e.key === 'ArrowRight' && audio.duration){
+      audio.currentTime = Math.min(audio.duration, audio.currentTime + 5);
+    } else if (e.key === 'ArrowLeft' && audio.duration){
+      audio.currentTime = Math.max(0, audio.currentTime - 5);
+    }
+  });
+
+  /* ---------- init ---------- */
+
+  loadTrack(0, false);
+
+})();
+</script>
+
+</body>
+</html>
