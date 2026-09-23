@@ -3,7 +3,7 @@ music-player-cli — build a self-contained record-player HTML file
 USAGE
   music-player-cli --name "Song" --artist "Artist" --audio song.mp3
                    [--img background.png] [--cover cover.jpg]
-                   [--shade 0.6] [--out player.html] [--open]
+                   [--shade 0.6] [--palette 1] [--out player.html] [--open]
 
   (music-player is installed as an alias and works the same way.)
 
@@ -20,6 +20,9 @@ OPTIONAL
             A vignette shade is layered over it for depth.
   --shade   Backdrop dimming strength, 0..1 (default 0.72).
             Higher = darker. 0 shows the image nearly undimmed.
+  --palette Palette index 0-3 (default 0):
+              0 brass & mahogany   1 blue hour
+              2 emerald lounge     3 burgundy booth
   --out     Output file (default: <music-player folder>/<song-name-slug>.html)
   --open    Open the generated file in your default browser
   --help    Show this help

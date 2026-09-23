@@ -17,6 +17,9 @@
               laid over it so it doesn't distract (optional)
     --cover   Album art for the spinning disc (optional)
     --shade   Backdrop dimming, 0..1 (default 0.72)
+    --palette Palette index 0..3 (default 0):
+                0 brass & mahogany · 1 blue hour
+                2 emerald lounge  · 3 burgundy booth
     --out     Output HTML path (default: <music-player folder>/<slug>.html)
     --open    Open the generated file in the default browser
 
@@ -30,6 +33,60 @@ const { execFile } = require('child_process');
 
 const TEMPLATE_PATH = path.join(__dirname, 'template.html');
 const DEFAULT_SHADE = 0.72;
+
+// Same palettes as music-player.py: each sets the :root tokens in
+// template.html (room background, groove/brass hardware, text colors,
+// and the gradient veil strengths) so imagery dimming themes with it.
+const PALETTES = [
+  {  // 0: brass & mahogany (default)
+    '--bg-1': '#1b140f',
+    '--bg-2': '#241b14',
+    '--vinyl': '#100d0a',
+    '--groove': '#2a2119',
+    '--brass': '#c79a4b',
+    '--brass-light': '#e6c789',
+    '--cream': '#f2e9d8',
+    '--muted': '#a9998c',
+    '--veil': '0.72',
+    '--cover-shade': '0.55'
+  },
+  {  // 1: blue hour
+    '--bg-1': '#10141f',
+    '--bg-2': '#161c2c',
+    '--vinyl': '#0a0d16',
+    '--groove': '#1c2438',
+    '--brass': '#5b84c4',
+    '--brass-light': '#9db8e2',
+    '--cream': '#e8ecf5',
+    '--muted': '#8b96ad',
+    '--veil': '0.72',
+    '--cover-shade': '0.55'
+  },
+  {  // 2: emerald lounge
+    '--bg-1': '#0f1712',
+    '--bg-2': '#15211a',
+    '--vinyl': '#0a100c',
+    '--groove': '#1e2c22',
+    '--brass': '#4fa07a',
+    '--brass-light': '#93c9ab',
+    '--cream': '#e9f2ec',
+    '--muted': '#8aa394',
+    '--veil': '0.72',
+    '--cover-shade': '0.55'
+  },
+  {  // 3: burgundy booth
+    '--bg-1': '#1c1013',
+    '--bg-2': '#26181c',
+    '--vinyl': '#120a0d',
+    '--groove': '#2c1d22',
+    '--brass': '#c4576a',
+    '--brass-light': '#e29aa6',
+    '--cream': '#f5eaec',
+    '--muted': '#ad8d94',
+    '--veil': '0.72',
+    '--cover-shade': '0.55'
+  }
+];
 
 const MIME = {
   '.m4a': 'audio/mp4',
@@ -94,6 +151,15 @@ function slugify(name) {
     .slice(0, 60) || 'track';
 }
 
+function applyPalette(html, palette) {
+  for (const key of Object.keys(palette)) {
+    const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp('(' + escaped + '):\\s*[^;]+;');
+    html = html.replace(re, (m, k) => k + ': ' + palette[key] + ';');
+  }
+  return html;
+}
+
 function openInBrowser(file) {
   const p = path.resolve(file);
   const cmdLine = process.platform === 'win32' ? 'cmd.exe'
@@ -133,6 +199,18 @@ function main() {
     die('--shade requires a number between 0 and 1');
   }
 
+  const paletteRaw = flags.palette;
+  let paletteIndex = 0;
+  if (paletteRaw !== undefined && paletteRaw !== true && paletteRaw !== '') {
+    paletteIndex = Number(paletteRaw);
+    if (!Number.isInteger(paletteIndex) || paletteIndex < 0 || paletteIndex >= PALETTES.length) {
+      die(`--palette must be an integer between 0 and ${PALETTES.length - 1}`);
+    }
+  } else if (paletteRaw === true || paletteRaw === '') {
+    die(`--palette requires a number between 0 and ${PALETTES.length - 1}`);
+  }
+  const palette = PALETTES[paletteIndex];
+
   const audioSrc = readB64(audio, '--audio');
   const coverImage = flags.cover ? readB64(flags.cover, '--cover') : '';
 
@@ -164,7 +242,7 @@ function main() {
     .map((line, idx) => (idx === 0 ? line : '  ' + line))
     .join('\n');
 
-  const out = template.replace(marker, 'const TRACKLIST = ' + json + ';');
+  const out = applyPalette(template.replace(marker, 'const TRACKLIST = ' + json + ';'), palette);
   const outPath = path.resolve(typeof flags.out === 'string' && flags.out
     ? flags.out : path.join(__dirname, slugify(name) + '.html'));
   fs.writeFileSync(outPath, out);
@@ -174,6 +252,7 @@ function main() {
   console.log(`  Track:   "${name}" — ${artist}`);
   if (backdropImage) console.log('  Backdrop: yes (gradient veil applied)');
   if (coverImage) console.log('  Cover art: yes (vignette shade applied)');
+  console.log(`  Palette:  ${paletteIndex} (${['brass & mahogany', 'blue hour', 'emerald lounge', 'burgundy booth'][paletteIndex]})`);
   console.log('  Open it in any browser — no server needed.');
 
   if (flags.open) openInBrowser(outPath);

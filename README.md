@@ -25,7 +25,7 @@ The output needs **no server, no build tools, and no runtime dependencies** beyo
 
 ```sh
 npx @hell0beta/music-player-cli --name "Akari" --artist "Soushi Sakiyama" \
-  --audio song.m4a --img background.png --open
+  --audio song.m4a --img background.png --palette 1 --open
 ```
 
 ---
@@ -52,7 +52,7 @@ npx @hell0beta/music-player-cli --name "Akari" --artist "Soushi Sakiyama" \
 - 🖼️ **Backdrop & cover art** – full-page background behind the player (dimmed by a gradient veil) and round album art on the disc (vignette-shaded, spinning with the record)
 - 📦 **Single-file output** – audio + images embedded as base64; the whole player is one portable `.html`
 - ⌨️ **Keyboard controls** – `Space` play/pause, `←` / `→` seek ±5 seconds
-- 🎨 **Four palettes** (Python CLI) – brass & mahogany, blue hour, emerald lounge, burgundy booth
+- 🎨 **Four palettes** – brass & mahogany, blue hour, emerald lounge, burgundy booth (`--palette`, both CLIs)
 - 🔀 **Multi-track** – two or more entries in `TRACKLIST` and prev/next controls with an `X / Y` counter appear automatically
 - ♿ **Reduced motion aware** – `prefers-reduced-motion` disables the spin and tonearm animation
 - 🪶 **Zero dependencies** – plain HTML/CSS/JS; the only network requests are Google Fonts
@@ -99,6 +99,7 @@ The generated file lands next to the project as `<song-name-slug>.html` (or wher
 | `--img`     | Full-page background image (`.png .jpg .webp .gif`), gradient veil applied | none                     |
 | `--cover`   | Album art for the spinning disc (`.jpg .png .webp`), vignette shade applied | none                    |
 | `--shade`   | Backdrop dimming strength, `0..1` — higher = darker                    | `0.72`                        |
+| `--palette` | Palette index `0`–`3`: brass & mahogany, blue hour, emerald lounge, burgundy booth | `0`               |
 | `--out`     | Output file path                                                       | `<music-player>/<slug>.html`  |
 | `--open`    | Open the result in your default browser                                | off                           |
 | `--help`    | Show help                                                              | —                             |
